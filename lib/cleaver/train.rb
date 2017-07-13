@@ -68,16 +68,12 @@ module Cleaver
     def save_model
       output_path = @options[:output_path] || "models/"
 
-      File.open(output_path + "tprior_count", "w") do |file|
-        file.write(@tprior_count)
-      end
-
-      File.open(output_path + "tseq_count", "w") do |file|
-        file.write(@tseq_count)
-      end
-
-      File.open(output_path + "ct_count", "w") do |file|
-        file.write(@ct_count)
+      File.open(output_path + "default_model.rb", "w") do |file|
+        file.write("module Model\n")
+        file.write("  TPRIOR_COUNT = #{@tprior_count}\n")
+        file.write("  TSEQ_COUNT = #{@tseq_count}\n")
+        file.write("  CT_COUNT = #{@ct_count}\n")
+        file.write("end\n")
       end
     end
   end
