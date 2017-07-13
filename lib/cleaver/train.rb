@@ -45,7 +45,7 @@ module Cleaver
       end
 
       # model process
-      @tprior_count = @tprior_count.collect { |e| Math.log(e.to_f / total_freq) }
+      @tprior_count = @tprior_count.collect { |e| Math.log((e + addsmooth).to_f / (total_freq + 4 * addsmooth)) }
       @ct_count = @ct_count.collect { |e| Math.log((e + addsmooth).to_f / (total_freq + 70000 * 4 * addsmooth)) }
       @tseq_count = @tseq_count.collect { |e| Math.log((e + addsmooth).to_f / (tseq_total_freq + 4 * 4 * addsmooth)) }
       save_model
