@@ -1,6 +1,5 @@
 require "csv"
 require "matrix"
-require "pry"
 
 module Cleaver
   class HMM
@@ -9,10 +8,12 @@ module Cleaver
       @options = options
     end
 
-    def train
+    def train(addsmooth = 1)
       @tprior_count = Matrix.build(4, 1) { 0 }
       @tseq_count = Matrix.build(4, 4) { 0 }
       @ct_count = Matrix.build(70000, 4) { 0 }
+      total_freq = 0
+      tseq_total_freq = 0
       counter = 0
 
       CSV.foreach(@csv_file_path) do |row|
@@ -34,12 +35,19 @@ module Cleaver
           if i+1 != splited_tags.length
             next_tag_index = tag_to_num(splited_tags[i+1])
             @tseq_count[tag_index, next_tag_index] = @tseq_count[tag_index, next_tag_index] + 1
+            tseq_total_freq += 1
           end
 
           # count ct
           @ct_count[word_index, tag_index] = @ct_count[word_index, tag_index] + 1
+          total_freq += 1
         end
       end
+
+      # model process
+      @tprior_count = @tprior_count.collect { |e| Math.log(e.to_f / total_freq) }
+      @ct_count = @ct_count.collect { |e| Math.log((e + addsmooth).to_f / (total_freq + 70000 * 4 * addsmooth)) }
+      @tseq_count = @tseq_count.collect { |e| Math.log((e + addsmooth).to_f / (tseq_total_freq + 4 * 4 * addsmooth)) }
       save_model
     end
 
